@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>منظم الجدول الدراسي الاحترافي</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --bg-app: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --radius-main: 16px;
+            --radius-input: 12px;
+            --transition: all 0.25s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-app: #0b0f19;
+            --bg-card: #151f32;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #222f47;
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            transition: var(--transition);
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: var(--radius-main);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .header-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-main h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle-btn {
+            background: var(--bg-app);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-card, .timetable-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-main);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .input-field {
+            margin-bottom: 16px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .input-field select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-input);
+            background: var(--bg-app);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            background-size: 16px;
+        }
+
+        .input-field select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-input);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-add { background: var(--primary); color: white; }
+        .btn-add:hover { background: var(--primary-dark); }
+
+        .secondary-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-print { background: #10b981; color: white; }
+        .btn-print:hover { background: #059669; }
+
+        .btn-clear { background: #ef4444; color: white; }
+        .btn-clear:hover { background: #dc2626; }
+
+        .desktop-table-view {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 14px;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .corner-header { background: #334155; }
+        [data-theme="dark"] .corner-header { background: #111827; }
+
+        td.day-label {
+            background: var(--bg-app);
+            font-weight: 700;
+            width: 110px;
+        }
+
+        td.table-slot {
+            height: 95px;
+            width: 180px;
+            position: relative;
+        }
+
+        .mobile-cards-view {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .mobile-day-card {
+            background: var(--bg-app);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .mobile-day-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+            padding-right: 8px;
+        }
+
+        .mobile-slots-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-slot-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            min-height: 50px;
+        }
+
+        .time-badge {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .card-lesson {
+            background-color: var(--bg-app);
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
+            animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .desktop-table-view .card-lesson {
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .delete-btn-icon {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .delete-btn-icon:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .desktop-table-view { display: none; }
+            .mobile-cards-view { display: flex; }
+            body { padding: 10px; }
+            .control-card, .timetable-card { padding: 16px; }
+        }
+
+        @media print {
+            .control-card, .theme-toggle-btn, .delete-btn-icon { display: none !important; }
+            .app-layout { grid-template-columns: 1fr; }
+            .desktop-table-view { display: block !important; }
+            .mobile-cards-view { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <div class="header-main">
+            <span class="app-icon">📅</span>
+            <h1>جداولي الدراسية</h1>
+        </div>
+        <button class="theme-toggle-btn" id="themeBtn" aria-label="تبديل الوضع">🌙</button>
+    </header>
+
+    <main class="app-layout">
+        <section class="control-card">
+            <h2 class="section-title">⚙️ إضافة حصة جديدة</h2>
+            
+            <div class="input-field">
+                <label for="levelSelect">المستوى التعليمي</label>
+                <select id="levelSelect">
+                    <option value="2eme">السنة الثانية (2ème)</option>
+                    <option value="3eme">السنة الثالثة (3ème)</option>
+                    <option value="bac">الباكالوريا (Bac)</option>
+                </select>
+            </div>
+
+            <div class="input-field">
+                <label for="subjectSelect">المادة</label>
+                <select id="subjectSelect"></select>
+            </div>
+
+            <div class="grid-inputs">
+                <div class="input-field">
+                    <label for="daySelect">اليوم</label>
+                    <select id="daySelect">
+                        <option value="الإثنين">الإثنين</option>
+                        <option value="الثلاثاء">الثلاثاء</option>
+                        <option value="الأربعاء">الأربعاء</option>
+                        <option value="الخميس">الخميس</option>
+                        <option value="الجمعة">الجمعة</option>
+                        <option value="السبت">السبت</option>
+                    </select>
+                </div>
+
+                <div class="input-field">
+                    <label for="timeSelect">التوقيت</label>
+                    <select id="timeSelect">
+                        <option value="t1">08:00 - 10:00</option>
+                        <option value="t2">10:00 - 12:00</option>
+                        <option value="t3">14:00 - 16:00</option>
+                        <option value="t4">16:00 - 18:00</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="action-btn btn-add" id="addBtn">➕ إدراج في الجدول</button>
+            
+            <div class="secondary-actions">
+                <button class="action-btn btn-print" id="printBtn">🖨️ طباعة</button>
+                <button class="action-btn btn-clear" id="clearBtn">🧹 مسح الكل</button>
+            </div>
+        </section>
+
+        <section class="timetable-card">
+            <h2 class="section-title" id="tableHeading">📅 جدول حصص مستوى: السنة الثانية</h2>
+            
+            <div class="desktop-table-view">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="corner-header">اليوم / الوقت</th>
+                            <th>08:00 - 10:00</th>
+                            <th>10:00 - 12:00</th>
+                            <th>14:00 - 16:00</th>
+                            <th>16:00 - 18:00</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktopTableBody"></tbody>
+                </table>
+            </div>
+            <div class="mobile-cards-view" id="mobileCardsContainer"></div>
+        </section>
+    </main>
+</div>
+
+<script>
+    const subjectsData = {
+        "2eme": ["الرياضيات", "الفيزياء والكيمياء", "علوم الحياة والأرض", "اللغة العربية", "اللغة الفرنسية", "اللغة الإنجليزية", "التكنولوجيا", "التاريخ والجغرافيا", "التربية الإسلامية"],
+        "3eme": ["الرياضيات", "العلوم الفيزيائية", "علوم الحياة والأرض", "اللغة العربية", "اللغة الفرنسية", "اللغة الإنجليزية", "التاريخ والجغرافيا", "الفلسفة", "التربية الإسلامية"],
+        "bac": ["الرياضيات المتقدمة", "الفيزياء والكيمياء", "علوم الحياة والأرض", "الفلسفة", "اللغة الفرنسية", "اللغة الإنجليزية", "اللغة العربية", "التاريخ والجغرافيا", "الفكر الإسلامي"]
+    };
+
+    const colorMap = {
+        "الرياضيات": "#dbeafe", "الرياضيات المتقدمة": "#dbeafe",
+        "الفيزياء والكيمياء": "#fef3c7", "العلوم الفيزيائية": "#fef3c7",
+        "علوم الحياة والأرض": "#dcfce7",
+        "اللغة العربية": "#ffedd5",
+        "اللغة الفرنسية": "#f3e8ff",
+        "اللغة الإنجليزية": "#fae8ff",
+        "التاريخ والجغرافيا": "#e0f2fe",
+        "الفلسفة": "#f1f5f9",
+        "التكنولوجيا": "#e2e8f0",
+        "التربية الإسلامية": "#ccfbf1", "الفكر الإسلامي": "#ccfbf1"
+    };
+
+    const days = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    const times = [
+        { id: "t1", label: "08:00 - 10:00" },
+        { id: "t2", label: "10:00 - 12:00" },
+        { id: "t3", label: "14:00 - 16:00" },
+        { id: "t4", label: "16:00 - 18:00" }
+    ];
+
+    let savedTimetable = JSON.parse(localStorage.getItem('student_timetable_v2')) || {};
+
+    function initApplication() {
+        if (localStorage.getItem('theme_v2') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeBtn').innerHTML = "☀️";
+        }
+
+        buildDesktopTable();
+        buildMobileCards();
+        updateSubjects();
+        renderSavedLessons();
+        setupEventListeners();
+    }
+
+    function buildDesktopTable() {
+        const tbody = document.getElementById('desktopTableBody');
+        tbody.innerHTML = '';
+
+        days.forEach(day => {
+            let row = document.createElement('tr');
+            row.innerHTML = `<td class="day-label">${day}</td>`;
+            
+            times.forEach(time => {
+                row.innerHTML += `<td id="desktop-${day}-${time.id}" class="table-slot"></td>`;
+            });
+            tbody.appendChild(row);
+        });
+    }
+
+    function buildMobileCards() {
+        const container = document.getElementById('mobileCardsContainer');
+        container.innerHTML = '';
+
+        days.forEach(day => {
+            let dayCard = document.createElement('div');
+            dayCard.className = 'mobile-day-card';
+            
+            let slotsHTML = '';
+            times.forEach(time => {
+                slotsHTML += `
+                    <div class="mobile-slot-row">
+                        <span class="time-badge">${time.label}</span>
+                        <div id="mobile-${day}-${time.id}" style="flex-grow: 1; margin-right: 15px; display: flex; justify-content: flex-end;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">فارغ</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            dayCard.innerHTML = `
+                <div class="mobile-day-title">${day}</div>
+                <div class="mobile-slots-list">${slotsHTML}</div>
+            `;
+            container.appendChild(dayCard);
+        });
+    }
+
+    function updateSubjects() {
+        const level = document.getElementById('levelSelect').value;
+        const subjectSelect = document.getElementById('subjectSelect');
+        const levelText = document.getElementById('levelSelect').options[document.getElementById('levelSelect').selectedIndex].text;
+        
+        document.getElementById('tableHeading').innerText = `📅 جدول حصص مستوى: ${levelText}`;
+        
+        subjectSelect.innerHTML = '';
+        if (subjectsData[level]) {
+            subjectsData[level].forEach(sub => {
+                let opt = document.createElement('option');
+                opt.value = sub;
+                opt.textContent = sub;
+                subjectSelect.appendChild(opt);
+            });
+        }
+    }
+
+    function addLesson() {
+        const subject = document.getElementById('subjectSelect').value;
+        const day = document.getElementById('daySelect').value;
+        const time = document.getElementById('timeSelect').value;
+        
+        const key = `${day}-${time}`;
+        savedTimetable[key] = subject;
+        localStorage.setItem('student_timetable_v2', JSON.stringify(savedTimetable));
+
+        drawLesson(day, time, subject);
+    }
+
+    function drawLesson(day, time, subject) {
+        const desktopId = `desktop-${day}-${time}`;
+        const mobileId = `mobile-${day}-${time}`;
+        
+        const desktopCell = document.getElementById(desktopId);
+        const mobileCell = document.getElementById(mobileId);
+        const bgColor = colorMap[subject] || "#f1f5f9";
+
+        const lessonHTML = `
+            <div class="card-lesson" style="background-color: ${bgColor}; color: #0f172a; border-right: 4px solid var(--primary);">
+                <span>${subject}</span>
+                <button class="delete-btn-icon" data-day="${day}" data-time="${time}">×</button>
+            </div>
+        `;
+
+        if (desktopCell) desktopCell.innerHTML = lessonHTML;
+        if (mobileCell) mobileCell.innerHTML = lessonHTML;
+
+        document.querySelectorAll(`button[data-day="${day}"][data-time="${time}"]`).forEach(btn => {
+            btn.addEventListener('click', function() {
+                removeLesson(day, time);
+            });
+        });
+    }
+
+    function renderSavedLessons() {
+        Object.keys(savedTimetable).forEach(key => {
+            const [day, time] = key.split('-');
+            drawLesson(day, time, savedTimetable[key]);
+        });
+    }
+
+    function removeLesson(day, time) {
+        const key = `${day}-${time}`;
+        delete savedTimetable[key];
+        localStorage.setItem('student_timetable_v2', JSON.stringify(savedTimetable));
+
+        const desktopCell = document.getElementById(`desktop-${day}-${time}`);
+        const mobileCell = document.getElementById(`mobile-${day}-${time}`);
+
+        if (desktopCell) desktopCell.innerHTML = '';
+        if (mobileCell) mobileCell.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem;">فارغ</span>`;
+    }
+
+    function clearAll() {
+        if (confirm("هل أنت متأكد من حذف الجدول بالكامل؟")) {
+            savedTimetable = {};
+            localStorage.removeItem('student_timetable_v2');
+            buildDesktopTable();
+            buildMobileCards();
+            renderSavedLessons();
+        }
+    }
+
+    function toggleTheme() {
+        const isDark = document.documentElement.hasAttribute('data-theme');
+        const themeBtn = document.getElementById('themeBtn');
+        
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            themeBtn.innerHTML = "🌙";
+            localStorage.setItem('theme_v2', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeBtn.innerHTML = "☀️";
+            localStorage.setItem('theme_v2', 'dark');
+        }
+    }
+
+    function setupEventListeners() {
+        document.getElementById('levelSelect').addEventListener('change', updateSubjects);
+        document.getElementById('addBtn').addEventListener('click', addLesson);
+        document.getElementById('printBtn').addEventListener('click', () => window.print());
+        document.getElementById('clearBtn').addEventListener('click', clearAll);
+        document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+    }
+
+    window.onload = initApplication;
+</script>
+
+</body>
+</html>
